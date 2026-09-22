@@ -2,68 +2,311 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
-<link rel="manifest" href="./manifest.json">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
 <title>WEEK check</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<link rel="manifest" href="manifest.json">
 <style>
-*{box-sizing:border-box}html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:#111827;background:#f3f4f6}
-body{overflow:hidden}.top{height:118px;background:#111827;color:#fff;position:relative;z-index:20;padding:12px 14px 10px}.topin{max-width:1200px;margin:auto}.brand{font-weight:800;font-size:20px}.sub{font-size:11px;opacity:.7;margin-top:2px}.nav{display:flex;align-items:center;gap:8px;margin-top:9px}.nav button,.tool button{border:0;border-radius:9px;padding:7px 11px;font-weight:700}.nav button{background:#374151;color:#fff;font-size:17px}.range{font-size:13px;font-weight:800;min-width:145px;text-align:center}.tool{margin-left:auto;display:flex;gap:6px}.tool button{font-size:11px}.connect{background:#fff;color:#111827}.sync{background:#6366f1;color:#fff}.sync:disabled{opacity:.45}
-#status{position:absolute;right:14px;bottom:8px;font-size:10px;color:#d1d5db}
-.viewport{height:calc(100vh - 118px);overflow:auto;background:#e5e7eb}.calendar{min-width:900px;max-width:1200px;margin:0 auto;padding-bottom:30px}.days{display:grid;grid-template-columns:72px repeat(7,1fr);position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #d1d5db}.corner{border-right:1px solid #d1d5db;background:#f9fafb}.dayhead{height:58px;border-right:1px solid #d1d5db;text-align:center;padding-top:7px;background:#fff}.dayhead .dow{font-size:11px;color:#6b7280}.dayhead .date{font-size:17px;font-weight:800;margin-top:1px}.dayhead.today{background:#eef2ff}.dayhead.today .date{color:#4f46e5}
-.bodygrid{display:grid;grid-template-columns:72px repeat(7,1fr);position:relative}.times{background:#f9fafb;border-right:1px solid #d1d5db}.t{height:60px;border-bottom:1px solid #e5e7eb;font-size:10px;color:#6b7280;text-align:right;padding:4px 7px 0 0}.columns{display:contents}.col{height:1080px;position:relative;background:#fff;border-right:1px solid #d1d5db}.col.today{background:#fbfbff}.hourline{height:60px;border-bottom:1px solid #e5e7eb;position:relative}.half{position:absolute;left:0;right:0;top:29px;border-top:1px dashed #f0f0f0}.nowline{position:absolute;left:0;right:0;border-top:2px solid #ef4444;z-index:4;pointer-events:none}.event{position:absolute;left:4px;right:4px;min-height:22px;padding:5px 6px;border-left:3px solid #6366f1;border-radius:6px;background:#eef2ff;overflow:hidden;z-index:5;box-shadow:0 1px 2px #0001}.event .name{font-size:11px;font-weight:800;line-height:1.3;white-space:normal}.event .time{font-size:9px;color:#4b5563;margin-top:2px}.event .place{font-size:9px;color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.allday{min-height:30px;background:#fff;border-bottom:1px solid #d1d5db;display:grid;grid-template-columns:72px repeat(7,1fr)}.alabel{font-size:9px;color:#6b7280;background:#f9fafb;border-right:1px solid #d1d5db;padding:8px 5px;text-align:right}.acell{border-right:1px solid #d1d5db;padding:4px;display:flex;flex-wrap:wrap;gap:3px}.atitle{font-size:9px;background:#e5e7eb;border-radius:5px;padding:3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.empty{position:fixed;left:50%;top:135px;transform:translateX(-50%);z-index:30;background:#111827;color:#fff;border-radius:999px;padding:7px 12px;font-size:11px;opacity:.9;display:none}.empty.show{display:block}
-@media(max-width:600px){.top{height:112px}.viewport{height:calc(100vh - 112px)}.calendar{min-width:700px}.days,.bodygrid{grid-template-columns:54px repeat(7,92px)}.allday{grid-template-columns:54px repeat(7,92px)}.corner{width:54px}.dayhead{height:54px}.dayhead .date{font-size:15px}.t{height:60px;font-size:9px;padding-right:5px}.brand{font-size:18px}.range{min-width:130px}.tool{gap:4px}.tool button{padding:6px 8px}.event{left:3px;right:3px;padding:4px 5px}.event .name{font-size:10px}.event .time,.event .place{font-size:8px}}
+:root{
+  --hour:64px; --left:58px; --daymin:150px;
+  --line:#e5e7eb; --text:#1f2937; --muted:#6b7280; --bg:#f7f8fa;
+  --today:#eef6ff; --accent:#2563eb;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:var(--text);background:var(--bg)}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:12px}
+.title{font-size:22px;font-weight:800}
+.sub{font-size:12px;color:var(--muted);margin-top:2px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+button{border:1px solid #d1d5db;background:#fff;border-radius:9px;padding:8px 12px;font-size:14px;cursor:pointer}
+button.primary{background:#111827;color:#fff;border-color:#111827}
+button:disabled{opacity:.5;cursor:default}
+.status{font-size:13px;color:var(--muted);margin-left:auto}
+.error{color:#b91c1c}
+.wrap{overflow:auto;-webkit-overflow-scrolling:touch;background:#fff}
+.calendar{min-width:calc(var(--left) + var(--daymin) * 7)}
+.headrow{display:grid;grid-template-columns:var(--left) repeat(7,minmax(var(--daymin),1fr));position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.corner{border-right:1px solid var(--line);height:48px}
+.dayhead{height:48px;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px}
+.dayhead strong{font-size:15px}
+.dayhead.today{background:var(--today);color:var(--accent)}
+.body{display:grid;grid-template-columns:var(--left) repeat(7,minmax(var(--daymin),1fr))}
+.times{background:#fff;border-right:1px solid var(--line)}
+.timecell{height:var(--hour);border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);text-align:right;padding:5px 7px 0 0}
+.daycol{position:relative;background:#fff;border-right:1px solid var(--line);min-height:calc(var(--hour) * 15)}
+.daycol.today{background:linear-gradient(to right,rgba(37,99,235,.035),rgba(37,99,235,.035))}
+.hline{position:absolute;left:0;right:0;border-top:1px solid var(--line);pointer-events:none}
+.event{position:absolute;left:5px;right:5px;border-radius:7px;padding:5px 7px;overflow:hidden;background:#dbeafe;border-left:4px solid #2563eb;color:#0f172a;font-size:12px;line-height:1.25;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.event .time{font-size:10px;color:#475569}
+.event .name{font-weight:700;margin-top:2px}
+.event .loc{font-size:10px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.allday{margin:4px 5px;padding:4px 6px;border-radius:6px;background:#fef3c7;border-left:3px solid #d97706;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{padding:24px;text-align:center;color:var(--muted);background:#fff}
+@media(max-width:700px){
+  :root{--daymin:145px;--hour:58px}
+  header{position:relative}
+  .status{width:100%;margin-left:0}
+}
 </style>
 </head>
 <body>
-<header class="top"><div class="topin">
-  <div class="brand">WEEK check</div><div class="sub">7日間を横並びで見るバーティカル週間カレンダー</div>
-  <div class="nav"><button id="prev">‹</button><button id="today">今日</button><div class="range" id="range"></div><button id="next">›</button><div class="tool"><button class="connect" id="connectBtn">Google接続</button><button class="sync" id="syncBtn" disabled>更新</button></div></div>
-</div><div id="status">Googleカレンダー未接続</div></header>
-<div class="viewport" id="viewport"><div class="calendar">
-  <div class="days" id="days"></div>
-  <div class="allday" id="allday"></div>
-  <div class="bodygrid" id="bodygrid"></div>
-</div></div>
-<div class="empty" id="empty">Googleカレンダー接続後、予定がここに表示されます</div>
-<script src="./google-config.js"></script>
+<header>
+  <div class="title">WEEK check</div>
+  <div class="sub">7日間を横並びで見るバーティカル週間カレンダー</div>
+  <div class="toolbar">
+    <button id="prevBtn">‹</button>
+    <button id="todayBtn">今日</button>
+    <button id="nextBtn">›</button>
+    <button id="connectBtn" class="primary">Google接続</button>
+    <button id="refreshBtn">更新</button>
+    <span id="status" class="status">Googleカレンダー未接続</span>
+  </div>
+</header>
+
+<div id="calendarRoot" class="wrap"></div>
+
+<script src="google-config.js"></script>
 <script>
-const CONFIG={CLIENT_ID:window.WEEKCHECK_GOOGLE_CLIENT_ID||"",API_KEY:window.WEEKCHECK_GOOGLE_API_KEY||""};
-const SCOPES="https://www.googleapis.com/auth/calendar.readonly";
-const DISCOVERY="https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
-const START_HOUR=6, END_HOUR=24, PX_PER_HOUR=60;
-let tokenClient=null,gapiReady=false,token=null,offset=0,events=[];
-let base=new Date();base.setHours(0,0,0,0);
-const DOW=["日","月","火","水","木","金","土"];
-function startOfWeek(d){let x=new Date(d),n=x.getDay(),diff=(n===0?-6:1)-n;x.setDate(x.getDate()+diff);x.setHours(0,0,0,0);return x}
-function fmtDate(d){return `${d.getMonth()+1}/${d.getDate()}`}
-function isoDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function escapeHtml(s){return String(s||"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[c]))}
-function weekDates(){let s=startOfWeek(base);s.setDate(s.getDate()+offset*7);return Array.from({length:7},(_,i)=>{let d=new Date(s);d.setDate(d.getDate()+i);return d})}
-function render(){
- const ds=weekDates(), today=new Date();today.setHours(0,0,0,0);
- range.textContent=`${fmtDate(ds[0])} 〜 ${fmtDate(ds[6])}`;
- days.innerHTML='<div class="corner"></div>'+ds.map(d=>`<div class="dayhead ${d.getTime()===today.getTime()?"today":""}"><div class="dow">${DOW[d.getDay()]}</div><div class="date">${fmtDate(d)}</div></div>`).join('');
- allday.innerHTML='<div class="alabel">終日</div>'+ds.map(d=>{let day=isoDate(d);let a=events.filter(e=>e.date===day&&e.allDay);return `<div class="acell">${a.map(e=>`<div class="atitle">${escapeHtml(e.name)}</div>`).join('')}</div>`}).join('');
- let html='<div class="times">'+Array.from({length:END_HOUR-START_HOUR},(_,i)=>`<div class="t">${String(START_HOUR+i).padStart(2,'0')}:00</div>`).join('')+'</div>';
- ds.forEach(d=>{let day=isoDate(d);let isToday=d.getTime()===today.getTime();html+=`<div class="col ${isToday?'today':''}">`+Array.from({length:END_HOUR-START_HOUR},()=>'<div class="hourline"><span class="half"></span></div>').join('');
-   if(isToday){let mins=today.getHours()*60+today.getMinutes()-START_HOUR*60;if(mins>=0&&mins<((END_HOUR-START_HOUR)*60))html+=`<div class="nowline" style="top:${mins}px"></div>`}
-   events.filter(e=>e.date===day&&!e.allDay).forEach(e=>{let st=e.startMinutes, en=e.endMinutes||st+30;let top=(st-START_HOUR*60),height=Math.max(24,en-st);if(en<=START_HOUR*60||st>=END_HOUR*60)return;top=Math.max(0,top);height=Math.max(24,Math.min(en,END_HOUR*60)-Math.max(st,START_HOUR*60));html+=`<div class="event" style="top:${top}px;height:${height}px"><div class="name">${escapeHtml(e.name)}</div><div class="time">${e.time}${e.end?`〜${e.end}`:''}</div>${e.place?`<div class="place">📍 ${escapeHtml(e.place)}</div>`:''}</div>`});
-   html+='</div>';
- });
- bodygrid.innerHTML=html;
- const hasEvents=events.length>0;empty.classList.toggle('show',!hasEvents&&!!token);
+"use strict";
+
+const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+let tokenClient = null;
+let gapiInited = false;
+let gisInited = false;
+let accessToken = null;
+let events = [];
+let weekBase = startOfWeek(new Date());
+
+const statusEl = document.getElementById("status");
+const connectBtn = document.getElementById("connectBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+
+function setStatus(text, error=false){
+  statusEl.textContent = text;
+  statusEl.classList.toggle("error", error);
 }
-function setStatus(t){status.textContent=t}
-window.gapiLoaded=function(){gapi.load('client',async()=>{if(!CONFIG.API_KEY||CONFIG.API_KEY.includes('YOUR_'))return;try{await gapi.client.init({apiKey:CONFIG.API_KEY,discoveryDocs:[DISCOVERY]});gapiReady=true;setStatus(token?'Googleカレンダー接続済み':'Googleカレンダー未接続')}catch(e){console.error(e);setStatus('Google APIの初期化に失敗しました')}})};
-window.addEventListener('load',()=>{setTimeout(()=>{if(window.google?.accounts?.oauth2&&CONFIG.CLIENT_ID&&!CONFIG.CLIENT_ID.includes('YOUR_')){tokenClient=google.accounts.oauth2.initTokenClient({client_id:CONFIG.CLIENT_ID,scope:SCOPES,callback:async r=>{if(r.error){setStatus('Google認証に失敗しました');return}token=r.access_token;syncBtn.disabled=false;setStatus('Googleカレンダー接続済み');await loadEvents()}})},500)});
-connectBtn.onclick=()=>{if(!CONFIG.CLIENT_ID||CONFIG.CLIENT_ID.includes('YOUR_')||!CONFIG.API_KEY||CONFIG.API_KEY.includes('YOUR_')){alert('google-config.js にGoogleのクライアントIDとAPIキーを設定してください。');return}if(!tokenClient){alert('Google認証の読み込み中です。少し待ってからもう一度押してください。');return}tokenClient.requestAccessToken({prompt:token?'':'consent'})};
-syncBtn.onclick=loadEvents;
-async function loadEvents(){if(!token||!gapiReady){setStatus(gapiReady?'Googleカレンダー未接続':'Google APIの読み込み中です');return}let ds=weekDates(),s=ds[0],e=new Date(ds[6]);e.setDate(e.getDate()+1);try{let r=await gapi.client.calendar.events.list({calendarId:'primary',timeMin:s.toISOString(),timeMax:e.toISOString(),singleEvents:true,orderBy:'startTime',maxResults:250});events=(r.result.items||[]).map(x=>{let all=!!x.start?.date&&!x.start?.dateTime;if(all)return {date:x.start.date,allDay:true,name:x.summary||'(無題)',place:x.location||''};let st=x.start?.dateTime,en=x.end?.dateTime;if(!st)return null;let sd=st.slice(0,10),a=new Date(st),b=en?new Date(en):new Date(a.getTime()+30*60000);return {date:sd,allDay:false,startMinutes:a.getHours()*60+a.getMinutes(),endMinutes:b.getHours()*60+b.getMinutes(),time:a.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),end:b.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}),name:x.summary||'(無題)',place:x.location||''}}).filter(Boolean);render();setStatus(`Googleカレンダーから${events.length}件取得`)}catch(err){console.error(err);setStatus('予定の取得に失敗しました。Google API設定を確認してください。')}}
-prev.onclick=()=>{offset--;render();viewport.scrollTop=0};next.onclick=()=>{offset++;render();viewport.scrollTop=0};today.onclick=()=>{offset=0;render();viewport.scrollTop=0};
+
+function cfg(name){
+  return window[name] || "";
+}
+
+function validConfig(){
+  return cfg("WEEKCHECK_GOOGLE_CLIENT_ID") &&
+         !cfg("WEEKCHECK_GOOGLE_CLIENT_ID").startsWith("YOUR_") &&
+         cfg("WEEKCHECK_GOOGLE_API_KEY") &&
+         !cfg("WEEKCHECK_GOOGLE_API_KEY").startsWith("YOUR_");
+}
+
+function gapiLoaded(){
+  if (!window.gapi) { setStatus("Google APIを読み込めませんでした", true); return; }
+  gapi.load("client", initializeGapiClient);
+}
+
+async function initializeGapiClient(){
+  try{
+    await gapi.client.init({
+      apiKey: cfg("WEEKCHECK_GOOGLE_API_KEY"),
+      discoveryDocs: [DISCOVERY_DOC]
+    });
+    gapiInited = true;
+    maybeEnable();
+  }catch(e){
+    console.error(e);
+    setStatus("Google API初期化エラー", true);
+  }
+}
+
+function gisLoaded(){
+  try{
+    if (!window.google?.accounts?.oauth2) throw new Error("Google Identity Services unavailable");
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: cfg("WEEKCHECK_GOOGLE_CLIENT_ID"),
+      scope: SCOPES,
+      callback: ""
+    });
+    gisInited = true;
+    maybeEnable();
+  }catch(e){
+    console.error(e);
+    setStatus("Google認証の初期化エラー", true);
+  }
+}
+
+function maybeEnable(){
+  if (!validConfig()){
+    connectBtn.disabled = true;
+    setStatus("google-config.js の設定が必要です", true);
+    return;
+  }
+  if (gapiInited && gisInited) connectBtn.disabled = false;
+}
+
+function handleAuth(){
+  if (!tokenClient || !gapiInited || !gisInited){
+    setStatus("Google接続の準備中です。少し待ってから再度押してください", true);
+    return;
+  }
+  tokenClient.callback = async (resp)=>{
+    if (resp.error !== undefined){
+      console.error(resp);
+      setStatus("Google接続に失敗しました", true);
+      return;
+    }
+    accessToken = resp.access_token;
+    setStatus("Googleカレンダー接続済み");
+    await loadEvents();
+  };
+  tokenClient.requestAccessToken({prompt: accessToken ? "" : "consent"});
+}
+
+async function loadEvents(){
+  if (!accessToken){
+    handleAuth();
+    return;
+  }
+  try{
+    const start = new Date(weekBase);
+    const end = new Date(weekBase);
+    end.setDate(end.getDate()+7);
+    const response = await gapi.client.calendar.events.list({
+      calendarId:"primary",
+      timeMin:start.toISOString(),
+      timeMax:end.toISOString(),
+      showDeleted:false,
+      singleEvents:true,
+      orderBy:"startTime",
+      maxResults:2500
+    });
+    events = response.result.items || [];
+    setStatus(`Googleカレンダー接続済み・${events.length}件`);
+    render();
+  }catch(e){
+    console.error(e);
+    setStatus("予定の取得に失敗しました", true);
+  }
+}
+
+function startOfWeek(d){
+  const x = new Date(d);
+  x.setHours(0,0,0,0);
+  const day = x.getDay(); // Sun=0
+  const diff = day === 0 ? -6 : 1-day; // Monday start
+  x.setDate(x.getDate()+diff);
+  return x;
+}
+
+function fmtDate(d){
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function fmtTime(d){
+  return d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",hour12:false});
+}
+function dateKey(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function parseEventDate(value, allDay){
+  if(allDay) return new Date(value+"T00:00:00");
+  return new Date(value);
+}
+function eventForDay(ev, day){
+  const allDay = !!ev.start?.date;
+  const s = parseEventDate(ev.start?.dateTime || ev.start?.date, allDay);
+  const e = parseEventDate(ev.end?.dateTime || ev.end?.date, allDay);
+  if(allDay) return {allDay,s,e};
+  const ds = new Date(day); ds.setHours(0,0,0,0);
+  const de = new Date(ds); de.setDate(de.getDate()+1);
+  const clippedS = s < ds ? ds : s;
+  const clippedE = e > de ? de : e;
+  if(clippedS >= clippedE) return null;
+  return {allDay:false,s:clippedS,e:clippedE};
+}
+
+function render(){
+  const root = document.getElementById("calendarRoot");
+  const labels=["月","火","水","木","金","土","日"];
+  const now = new Date();
+  const days=[];
+  for(let i=0;i<7;i++){ const d=new Date(weekBase); d.setDate(d.getDate()+i); days.push(d); }
+
+  let html='<div class="calendar">';
+  html+='<div class="headrow"><div class="corner"></div>';
+  days.forEach((d,i)=>{
+    const today=dateKey(d)===dateKey(now);
+    html+=`<div class="dayhead ${today?"today":""}"><span>${labels[i]}</span><strong>${fmtDate(d)}</strong></div>`;
+  });
+  html+='</div>';
+
+  html+='<div class="body"><div class="times">';
+  for(let h=0;h<24;h++) html+=`<div class="timecell">${String(h).padStart(2,"0")}:00</div>`;
+  html+='</div>';
+
+  days.forEach((day)=>{
+    const today=dateKey(day)===dateKey(now);
+    html+=`<div class="daycol ${today?"today":""}">`;
+    for(let h=0;h<24;h++) html+=`<div class="hline" style="top:${h*64}px"></div>`;
+
+    const dayEvents = events.map(ev=>{
+      const info=eventForDay(ev,day);
+      return info?{ev,info}:null;
+    }).filter(Boolean);
+
+    for(const item of dayEvents){
+      const {ev,info}=item;
+      if(info.allDay){
+        html+=`<div class="allday" title="${escapeHtml(ev.summary||"(無題)")}">${escapeHtml(ev.summary||"(無題)")}</div>`;
+        continue;
+      }
+      const startMinutes=info.s.getHours()*60+info.s.getMinutes();
+      const duration=Math.max(20,(info.e-info.s)/60000);
+      const top=startMinutes*(64/60);
+      const height=Math.max(28,duration*(64/60)-4);
+      const time=`${fmtTime(info.s)}–${fmtTime(info.e)}`;
+      html+=`<div class="event" style="top:${top}px;height:${height}px" title="${escapeHtml(ev.summary||"(無題)")}">
+        <div class="time">${time}</div>
+        <div class="name">${escapeHtml(ev.summary||"(無題)")}</div>
+        ${ev.location?`<div class="loc">${escapeHtml(ev.location)}</div>`:""}
+      </div>`;
+    }
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  if(events.length===0 && !accessToken){
+    html+='<div class="empty">「Google接続」を押すと、Googleカレンダーの予定をここに表示します。</div>';
+  }
+  root.innerHTML=html;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+document.getElementById("prevBtn").addEventListener("click",()=>{
+  weekBase.setDate(weekBase.getDate()-7);
+  render();
+  if(accessToken) loadEvents();
+});
+document.getElementById("nextBtn").addEventListener("click",()=>{
+  weekBase.setDate(weekBase.getDate()+7);
+  render();
+  if(accessToken) loadEvents();
+});
+document.getElementById("todayBtn").addEventListener("click",()=>{
+  weekBase=startOfWeek(new Date());
+  render();
+  if(accessToken) loadEvents();
+});
+connectBtn.addEventListener("click",handleAuth);
+refreshBtn.addEventListener("click",()=>loadEvents());
+
 render();
+setStatus("Google APIを読み込み中…");
 </script>
-</body></html>
+
+<!-- Google公式クイックスタートと同じく、各ライブラリのonloadで初期化 -->
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>
