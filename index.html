@@ -170,17 +170,42 @@ async function loadEvents(){
     const start = new Date(weekBase);
     const end = new Date(weekBase);
     end.setDate(end.getDate()+7);
-    const response = await gapi.client.calendar.events.list({
-      calendarId:"primary",
-      timeMin:start.toISOString(),
-      timeMax:end.toISOString(),
+    // primary だけでなく、Googleアカウントで閲覧できるカレンダーを一覧取得して
+    // その週の予定をまとめて取得します。
+    const calResponse = await gapi.client.calendar.calendarList.list({
       showDeleted:false,
-      singleEvents:true,
-      orderBy:"startTime",
-      maxResults:2500
+      showHidden:false,
+      maxResults:250
     });
-    events = response.result.items || [];
-    setStatus(`Googleカレンダー接続済み・${events.length}件`);
+    const calendars = calResponse.result.items || [];
+
+    let allEvents = [];
+    for (const cal of calendars){
+      if (!cal.id) continue;
+      try{
+        const response = await gapi.client.calendar.events.list({
+          calendarId:cal.id,
+          timeMin:start.toISOString(),
+          timeMax:end.toISOString(),
+          showDeleted:false,
+          singleEvents:true,
+          orderBy:"startTime",
+          maxResults:2500
+        });
+        const items = response.result.items || [];
+        allEvents.push(...items.map(ev=>({
+          ...ev,
+          _calendarId:cal.id,
+          _calendarName:cal.summary || "Googleカレンダー"
+        })));
+      }catch(err){
+        // 閲覧権限などで取得できないカレンダーはスキップします。
+        console.warn("Calendar skipped:", cal.summary, err);
+      }
+    }
+
+    events = allEvents;
+    setStatus(`Googleカレンダー接続済み・${events.length}件（${calendars.length}カレンダー）`);
     render();
   }catch(e){
     console.error(e);
